@@ -35,24 +35,54 @@ public class OthelloSwingApplet extends JApplet
 
     public void init()
     {
-        getContentPane().setLayout(new GridLayout(1, 1));
-        JButton button = new JButton("Start Othello");
+        getContentPane().setLayout(new GridLayout(3, 1));
+        JButton minMaxButton = new JButton("Play Othello vs Minimax Player");
+        JButton positionalButton = new JButton("Play Othello vs Position Player");
+        JButton nnButton = new JButton("Play Othello vs NeuralNet Player");
 
-        getContentPane().add(button);
+        getContentPane().add(minMaxButton);
+        getContentPane().add(positionalButton);
+        getContentPane().add(nnButton);
 
-        button.addActionListener(new java.awt.event.ActionListener()
+        minMaxButton.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                buttonPushed(evt);
+                buttonPushed(evt, 1);
+            }
+        });
+
+        positionalButton.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                buttonPushed(evt, 2);
+            }
+        });
+
+        nnButton.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                buttonPushed(evt, 3);
             }
         });
     }
 
 
-    private void buttonPushed(java.awt.event.ActionEvent evt)
+    private void buttonPushed(java.awt.event.ActionEvent evt, int mode)
     {
-        OthelloSwingFrame f = new OthelloSwingFrame(true);
+        OthelloSwingFrame f = null;
+        if(mode == 1) {
+            // Minimax player
+            f = new OthelloSwingFrame(true, 1);
+        } else if(mode == 2) {
+            // Positional player
+            f = new OthelloSwingFrame(true, 2);
+        } else if(mode == 3) {
+            // NeuralNet player
+            f = new OthelloSwingFrame(true, 3);
+        }
         f.setVisible(true);
     }
 }

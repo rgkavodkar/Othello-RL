@@ -272,7 +272,7 @@ public class OthelloSwingFrame extends javax.swing.JFrame
      * Creates new form OthelloSwingFrame
      ****************************************************************/
 
-    public OthelloSwingFrame(boolean createdByApplet)
+    public OthelloSwingFrame(boolean createdByApplet, int mode)
     {
         m_createdByApplet = createdByApplet;
 
@@ -280,6 +280,11 @@ public class OthelloSwingFrame extends javax.swing.JFrame
             setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         else
             setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        m_ai_player = mode;
+
+        // Set the kind of AI player
+        m_CommandInterface = new CommandInterface(m_ai_player);
 
         try
         {
@@ -1108,7 +1113,7 @@ public class OthelloSwingFrame extends javax.swing.JFrame
 //    javax.swing.UIManager.put("CheckBox.font", new Font("Dialog", Font.PLAIN, 24));
 //    javax.swing.UIManager.put("MenuItem.font", new Font("Dialog", Font.PLAIN, 24));
 
-        new OthelloSwingFrame(false).setVisible(true);
+        new OthelloSwingFrame(false, 1).setVisible(true);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1151,7 +1156,7 @@ public class OthelloSwingFrame extends javax.swing.JFrame
     private javax.swing.JPanel jPanelPadding2;
     // End of variables declaration//GEN-END:variables
 
-    CommandInterface m_CommandInterface = new CommandInterface();
+    CommandInterface m_CommandInterface; // = new CommandInterface();
 
     BoardDrawingArea m_boardDrawingArea;
 
@@ -1205,4 +1210,7 @@ public class OthelloSwingFrame extends javax.swing.JFrame
     String m_sInstructionsDialogTitle = "Othello, instructions";
     String m_sInstructionsText = "";
     String m_sClose = "Close";
+
+    // AI player
+    int m_ai_player = 1;
 }

@@ -8,7 +8,7 @@ package Engine;
 
 /**
  * Implements a
- * stack entry that is used by Engine to store pieces that are turned during
+ * stack entry that is used by MinimaxPlayer to store pieces that are turned during
  * searching (see ComputeMove()).
  */
 
@@ -22,7 +22,7 @@ class SquareStackEntry
 
 /**
  * Implements a
- * stack that is used by Engine to store pieces that are turned during
+ * stack that is used by MinimaxPlayer to store pieces that are turned during
  * searching.
  */
 
@@ -72,7 +72,7 @@ class SquareStack
 
 
 /**
- * Used by Engine to store all possible moves
+ * Used by MinimaxPlayer to store all possible moves
  * at the first level and the values that were calculated for them.
  * This makes it possible to select a random move among those with equal
  * or nearly equal value after the search is completed.
@@ -90,7 +90,7 @@ class MoveAndValue
 
 
 /**
- * The class Engine produces moves from a Game object through calls to the
+ * The class MinimaxPlayer produces moves from a Game object through calls to the
  * function ComputeMove().
  * <P>
  * First of all: this is meant to be a simple example of a game playing
@@ -125,7 +125,7 @@ class MoveAndValue
  * simple example) and would also slow down computation (considerably?).
  */
 
-public class Engine extends SuperEngine
+public class MinimaxPlayer extends SuperEngine
 {
     private static final int LARGEINT = 99999;
     private static final int ILLEGAL_VALUE = 888888;
@@ -168,7 +168,7 @@ public class Engine extends SuperEngine
     private Score m_bc_score;
 
     /**
-     * A stack that is used by Engine to store pieces that are turned during
+     * A stack that is used by MinimaxPlayer to store pieces that are turned during
      * searching.
      */
 
@@ -204,13 +204,13 @@ public class Engine extends SuperEngine
 
     private long m_neighbor_bits[][];
 
-    public Engine(int st, int sd) { super(st, sd); SetupBcBoard(); SetupBits(); }
+    public MinimaxPlayer(int st, int sd) { super(st, sd); SetupBcBoard(); SetupBits(); }
 
 
-    public Engine(int st) { super(st); SetupBcBoard(); SetupBits(); }
+    public MinimaxPlayer(int st) { super(st); SetupBcBoard(); SetupBits(); }
 
 
-    public Engine() { super(5); SetupBcBoard(); SetupBits(); }
+    public MinimaxPlayer() { super(5); SetupBcBoard(); SetupBits(); }
 
 
     /**
@@ -278,7 +278,7 @@ public class Engine extends SuperEngine
         int max_y = 0;
 
         /**
-         * Used by Engine to store all possible moves
+         * Used by MinimaxPlayer to store all possible moves
          * at the first level and the values that were calculated for them.
          * This makes it possible to select a random move among those with equal
          * or nearly equal value after the search is completed.

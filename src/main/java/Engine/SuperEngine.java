@@ -25,7 +25,7 @@ import java.util.Random;
  * Functionality for telling the engine to interrupt calculation.
  */
 
-public abstract class SuperEngine
+public abstract class SuperEngine implements AIPlayer
 {
     /**
      * The programs current strenght level.

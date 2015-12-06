@@ -7,14 +7,27 @@ package Engine;
 
 
 /**
- * Implements an interface to Othello.Engine that is directed to
+ * Implements an interface to Othello.MinimaxPlayer that is directed to
  * what a user interface might want to do.
  */
 
 public class CommandInterface implements Runnable
 {
-    public CommandInterface()
+    public CommandInterface(int mode)
     {
+        m_last_entered_move_score = 0;
+        m_calculating = false;
+        if(mode == 1) {
+            // Minimax player
+            m_Engine  = new MinimaxPlayer();
+        } else if(mode == 2) {
+            // Positional player
+            m_Engine  = new PositionalPlayer();
+        } else if(mode == 3) {
+            // NeuralNet player
+            m_Engine  = new NeuralNetPlayer();
+        }
+        m_Game = new Game();
     }
 
 
@@ -232,9 +245,9 @@ public class CommandInterface implements Runnable
     }
 
 
-    private int m_last_entered_move_score = 0;
-    private boolean m_calculating = false;
-    private Engine m_Engine  = new Engine();
-    private Game m_Game = new Game();
+    private int m_last_entered_move_score;
+    private boolean m_calculating;
+    private AIPlayer m_Engine;
+    private Game m_Game;
     CommandInterfaceListener m_Listener;
 }
