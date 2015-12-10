@@ -16,23 +16,42 @@ import AI.PositionalPlayer;
  * what a user interface might want to do.
  */
 
-public class CommandInterface implements Runnable, Commands
+public class BotCommandInterface implements Runnable, Commands, BotCommands
 {
-    public CommandInterface(int mode)
+    public BotCommandInterface(int mode)
     {
         m_last_entered_move_score = 0;
         m_calculating = false;
         if(mode == 1) {
             // Minimax player
-            m_Engine  = new MinimaxPlayer();
+            m_Engine_1  = new MinimaxPlayer();
+            m_Engine_2  = new MinimaxPlayer();
         } else if(mode == 2) {
             // Positional player
-            m_Engine  = new PositionalPlayer();
+            m_Engine_1  = new PositionalPlayer();
+            m_Engine_2  = new MinimaxPlayer();
         } else if(mode == 3) {
             // NeuralNet player
-            m_Engine  = new NeuralNetPlayer();
+            m_Engine_1  = new NeuralNetPlayer();
+            m_Engine_2  = new MinimaxPlayer();
         }
         m_Game = new Game();
+    }
+
+    public void makeBotMove() {
+
+        int player = m_Game.GetWhoseTurn();
+        Move move = null;
+        System.out.println("Player: " + player);
+        if(player == 1) {
+            move = m_Engine_1.ComputeMove(m_Game);
+        } else if(player == 2) {
+            move = m_Engine_2.ComputeMove(m_Game);
+        }
+
+        if (move != null)
+            m_Game.MakeMove(move);
+
     }
 
 
@@ -40,7 +59,7 @@ public class CommandInterface implements Runnable, Commands
     {
         int player = m_Game.GetWhoseTurn();
 
-        Move move = m_Engine.ComputeMove(m_Game);
+        Move move = m_Engine_1.ComputeMove(m_Game);
 
         if (move != null)
             m_Game.MakeMove(move);
@@ -70,12 +89,6 @@ public class CommandInterface implements Runnable, Commands
     public int GetScoreBlack()
     {
         return m_Game.GetScore(Score.BLACK);
-    }
-
-
-    public int GetLevel()
-    {
-        return m_Engine.GetStrength();
     }
 
 
@@ -207,14 +220,6 @@ public class CommandInterface implements Runnable, Commands
                 m_Game.GetScore(Score.WHITE) + m_Game.GetScore(Score.BLACK) > 4;
     }
 
-
-    public void SetLevel(int level)
-    {
-        if (SetLevelIsPossible())
-            m_Engine.SetStrength(level);
-    }
-
-
     public boolean SetLevelIsPossible()
     {
         return ! m_calculating;
@@ -237,11 +242,11 @@ public class CommandInterface implements Runnable, Commands
     }
 
 
-    public void InterruptComputation()
-    {
-        if (InterruptComputationIsPossible())
-            m_Engine.SetInterrupt(true);
-    }
+//    public void InterruptComputation()
+//    {
+//        if (InterruptComputationIsPossible())
+//            m_Engine.SetInterrupt(true);
+//    }
 
 
     public boolean InterruptComputationIsPossible()
@@ -252,7 +257,8 @@ public class CommandInterface implements Runnable, Commands
 
     private int m_last_entered_move_score;
     private boolean m_calculating;
-    private AIPlayer m_Engine;
+    private AIPlayer m_Engine_1;
+    private AIPlayer m_Engine_2;
     private Game m_Game;
     CommandInterfaceListener m_Listener;
 }

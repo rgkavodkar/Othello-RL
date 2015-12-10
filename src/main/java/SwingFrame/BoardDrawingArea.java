@@ -4,7 +4,7 @@ package SwingFrame;
  * Created by Rakesh on 06-12-2015.
  */
 
-import GameEngine.CommandInterface;
+import GameEngine.Commands;
 import GameEngine.Score;
 
 import java.awt.*;
@@ -19,7 +19,7 @@ import java.awt.*;
 
 class BoardDrawingArea extends javax.swing.JComponent
 {
-    private CommandInterface m_CommandInterface;
+    private Commands m_CommandInterface;
 
 
     /**
@@ -28,7 +28,7 @@ class BoardDrawingArea extends javax.swing.JComponent
      * @author  Mats Luthman
      ****************************************************************/
 
-    BoardDrawingArea(CommandInterface commandInterface)
+    BoardDrawingArea(Commands commandInterface)
     {
         m_CommandInterface = commandInterface;
     }

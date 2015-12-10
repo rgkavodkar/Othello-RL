@@ -7,6 +7,7 @@ package SwingFrame;
 
 import java.applet.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 
@@ -39,10 +40,12 @@ public class OthelloSwingApplet extends JApplet
         JButton minMaxButton = new JButton("Play Othello vs Minimax Player");
         JButton positionalButton = new JButton("Play Othello vs Position Player");
         JButton nnButton = new JButton("Play Othello vs NeuralNet Player");
+        JButton minimaxVsMinimaxButton = new JButton("Minimax Bot vs Minimax Bot");
 
         getContentPane().add(minMaxButton);
         getContentPane().add(positionalButton);
         getContentPane().add(nnButton);
+        getContentPane().add(minimaxVsMinimaxButton);
 
         minMaxButton.addActionListener(new java.awt.event.ActionListener()
         {
@@ -51,7 +54,6 @@ public class OthelloSwingApplet extends JApplet
                 buttonPushed(evt, 1);
             }
         });
-
         positionalButton.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -59,7 +61,6 @@ public class OthelloSwingApplet extends JApplet
                 buttonPushed(evt, 2);
             }
         });
-
         nnButton.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -67,22 +68,39 @@ public class OthelloSwingApplet extends JApplet
                 buttonPushed(evt, 3);
             }
         });
+
+        minimaxVsMinimaxButton.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                botGameMode(evt, 1);
+            }
+        });
     }
 
+    private void botGameMode(ActionEvent event, int mode) {
+        OthelloSwingBotFrame botModeFrame = null;
+        if(mode == 1) {
+            botModeFrame = new OthelloSwingBotFrame(true, 1);
+        } else if (mode == 2){
+            botModeFrame = new OthelloSwingBotFrame(true, 1);
+        }
+        botModeFrame.setVisible(true);
+    }
 
     private void buttonPushed(java.awt.event.ActionEvent evt, int mode)
     {
-        OthelloSwingFrame f = null;
+        OthelloSwingFrame humanModeFrame = null;
         if(mode == 1) {
             // Minimax player
-            f = new OthelloSwingFrame(true, 1);
+            humanModeFrame = new OthelloSwingFrame(true, 1);
         } else if(mode == 2) {
             // Positional player
-            f = new OthelloSwingFrame(true, 2);
+            humanModeFrame = new OthelloSwingFrame(true, 2);
         } else if(mode == 3) {
             // NeuralNet player
-            f = new OthelloSwingFrame(true, 3);
+            humanModeFrame = new OthelloSwingFrame(true, 3);
         }
-        f.setVisible(true);
+        humanModeFrame.setVisible(true);
     }
 }
