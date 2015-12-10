@@ -10,15 +10,17 @@ import AI.AIPlayer;
 import AI.MinimaxPlayer;
 import AI.NeuralNetPlayer;
 import AI.PositionalPlayer;
+import GameEngine.Interfaces.BotCommands;
+import GameEngine.Interfaces.Commands;
 
 /**
  * Implements an interface to Othello.MinimaxPlayer that is directed to
  * what a user interface might want to do.
  */
 
-public class BotCommandInterface implements Runnable, Commands, BotCommands
+public class BotCommandCenter implements Runnable, Commands, BotCommands
 {
-    public BotCommandInterface(int mode)
+    public BotCommandCenter(int mode)
     {
         m_last_entered_move_score = 0;
         m_calculating = false;

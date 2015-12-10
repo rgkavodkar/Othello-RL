@@ -7,7 +7,7 @@ package GameEngine;
 
 
 /**
- * Called when CommandInterface has finished a computation.
+ * Called when CommandCenter has finished a computation.
  */
 
 public interface CommandInterfaceListener

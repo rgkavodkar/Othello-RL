@@ -4,7 +4,7 @@ package SwingFrame;
  * Created by Rakesh on 06-12-2015.
  */
 
-import GameEngine.Commands;
+import GameEngine.Interfaces.Commands;
 import GameEngine.Score;
 
 import java.awt.*;

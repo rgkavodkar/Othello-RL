@@ -41,7 +41,7 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
         m_ai_player = mode;
 
         // Set the kind of AI player
-        m_CommandInterface = new BotCommandInterface(m_ai_player);
+        m_CommandInterface = new BotCommandCenter(m_ai_player);
 
         try
         {
@@ -906,7 +906,7 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
     private javax.swing.JPanel jPanelPadding2;
     // End of variables declaration//GEN-END:variables
 
-    BotCommandInterface m_CommandInterface; // = new CommandInterface();
+    BotCommandCenter m_CommandInterface; // = new CommandCenter();
 
     BoardDrawingArea m_boardDrawingArea;
 

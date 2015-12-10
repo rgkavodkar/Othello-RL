@@ -1,4 +1,4 @@
-package GameEngine;
+package GameEngine.Interfaces;
 
 /**
  * Created by Rakesh on 10-12-2015.

@@ -9,8 +9,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.plaf.*;
-import javax.swing.plaf.metal.*;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 
 import GameEngine.*;
@@ -44,7 +42,7 @@ public class OthelloSwingFrame extends javax.swing.JFrame
         m_ai_player = mode;
 
         // Set the kind of AI player
-        m_CommandInterface = new CommandInterface(m_ai_player);
+        m_CommandInterface = new CommandCenter(m_ai_player);
 
         try
         {
@@ -916,7 +914,7 @@ public class OthelloSwingFrame extends javax.swing.JFrame
     private javax.swing.JPanel jPanelPadding2;
     // End of variables declaration//GEN-END:variables
 
-    CommandInterface m_CommandInterface; // = new CommandInterface();
+    CommandCenter m_CommandInterface; // = new CommandCenter();
 
     BoardDrawingArea m_boardDrawingArea;
 

@@ -10,15 +10,16 @@ import AI.AIPlayer;
 import AI.MinimaxPlayer;
 import AI.NeuralNetPlayer;
 import AI.PositionalPlayer;
+import GameEngine.Interfaces.Commands;
 
 /**
  * Implements an interface to Othello.MinimaxPlayer that is directed to
  * what a user interface might want to do.
  */
 
-public class CommandInterface implements Runnable, Commands
+public class CommandCenter implements Runnable, Commands
 {
-    public CommandInterface(int mode)
+    public CommandCenter(int mode)
     {
         m_last_entered_move_score = 0;
         m_calculating = false;
