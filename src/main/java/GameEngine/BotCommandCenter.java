@@ -44,7 +44,6 @@ public class BotCommandCenter implements Runnable, Commands, BotCommands
 
         int player = m_Game.GetWhoseTurn();
         Move move = null;
-        System.out.println("Player: " + player);
         if(player == 1) {
             move = m_Engine_1.ComputeMove(m_Game);
         } else if(player == 2) {

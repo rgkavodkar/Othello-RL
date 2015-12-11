@@ -21,7 +21,7 @@ import GameEngine.*;
  ****************************************************************/
 
 public class OthelloSwingBotFrame extends javax.swing.JFrame
-        implements CommandInterfaceListener, Runnable
+//        implements CommandInterfaceListener
 {
 
     /**
@@ -38,10 +38,9 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
         else
             setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        m_ai_player = mode;
 
         // Set the kind of AI player
-        m_CommandInterface = new BotCommandCenter(m_ai_player);
+        m_CommandInterface = new BotCommandCenter(mode);
 
         try
         {
@@ -84,6 +83,11 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
             pairMoveCounter++;
             m_CommandInterface.makeBotMove();
             UpdateAll();
+//            try {
+//                Thread.sleep(200);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
         System.out.println("Done with bot game");
 
@@ -95,21 +99,21 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
      * Called when a move computation is finished.
      ****************************************************************/
 
-    public void ComputationFinished(Move m)
-    {
-        if (m != null && m.GetPlayer() == m_CommandInterface.GetWhoseTurn())
-        {
-            EventQueue.invokeLater(this);
-
-            m_CommandInterface.ComputeMove(this);
-        }
-        else
-        {
-            m_computing = false;
-
-            EventQueue.invokeLater(this);
-        }
-    }
+//    public void ComputationFinished(Move m)
+//    {
+//        if (m != null && m.GetPlayer() == m_CommandInterface.GetWhoseTurn())
+//        {
+//            EventQueue.invokeLater(this);
+//
+//            m_CommandInterface.ComputeMove(this);
+//        }
+//        else
+//        {
+//            m_computing = false;
+//
+//            EventQueue.invokeLater(this);
+//        }
+//    }
 
 
     /**
@@ -118,15 +122,15 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
      * move caclulation thread.
      ****************************************************************/
 
-    public void run()
-    {
-        if (! m_computing)
-            m_boardDrawingArea.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-        TextPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-        jPanelCalculating.setVisible(false);
-
-        UpdateAll();
-    }
+//    public void run()
+//    {
+//        if (! m_computing)
+//            m_boardDrawingArea.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+//        TextPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+//        jPanelCalculating.setVisible(false);
+//
+//        UpdateAll();
+//    }
 
 
     /**
@@ -145,8 +149,10 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
         else
             jLabelLastMove.setText(" ");
 
-        m_boardDrawingArea.repaint();
-        TextPanel.repaint();
+//        m_boardDrawingArea.repaint(5);
+//        TextPanel.repaint(5);
+        m_boardDrawingArea.paintImmediately(m_boardDrawingArea.getBounds());
+        TextPanel.paintImmediately(m_boardDrawingArea.getBounds());
     }
 
 
