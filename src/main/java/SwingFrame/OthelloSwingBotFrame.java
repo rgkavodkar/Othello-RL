@@ -89,9 +89,10 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
                 if(m_createdByApplet)
                     UpdateAll();
             }
-            m_CommandInterface.closingTasks();
+            m_CommandInterface.printScores();
             m_CommandInterface.NewGame();
         }
+        m_CommandInterface.closingTasks();
     }
 
     public void StartBotGame() {
