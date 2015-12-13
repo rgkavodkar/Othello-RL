@@ -73,15 +73,32 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
         } else {
             // Set the kind of AI player
             m_CommandInterface = new BotCommandCenter(mode);
-            StartBotGame();
+//            StartBotGame();
+            StartMultipleBotGame();
+        }
+    }
+
+    public void StartMultipleBotGame() {
+
+        for (int i = 0; i < 1000; i++) {
+            System.out.print("Iteration: " + i);
+            int moveCounter = 0;
+            while(moveCounter < 60) {
+                moveCounter++;
+                m_CommandInterface.makeBotMove();
+                if(m_createdByApplet)
+                    UpdateAll();
+            }
+            m_CommandInterface.closingTasks();
+            m_CommandInterface.NewGame();
         }
     }
 
     public void StartBotGame() {
 
-        int pairMoveCounter = 0;
-        while(pairMoveCounter < 60) {
-            pairMoveCounter++;
+        int moveCounter = 0;
+        while(moveCounter < 60) {
+            moveCounter++;
             m_CommandInterface.makeBotMove();
             if(m_createdByApplet)
                 UpdateAll();
@@ -757,10 +774,10 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
         if (fontSize != 0)
             MetalLookAndFeel.setCurrentTheme(new LargeFontsTheme(fontSize));
 
-        for (int i = 0; i < 1000; i++) {
-            System.out.print("Iteration: " + i);
+//        for (int i = 0; i < 1000; i++) {
+
             new OthelloSwingBotFrame(false, 1).setVisible(false);
-        }
+//        }
 
 //        new OthelloSwingBotFrame(true, 1).setVisible(true);
     }

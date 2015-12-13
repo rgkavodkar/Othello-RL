@@ -6,7 +6,6 @@ import GameEngine.Position;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.neural.data.NeuralData;
-import org.encog.neural.data.NeuralDataPair;
 import org.encog.neural.data.NeuralDataSet;
 import org.encog.neural.data.basic.BasicNeuralData;
 import org.encog.neural.data.basic.BasicNeuralDataSet;
@@ -15,10 +14,8 @@ import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.logic.FeedforwardLogic;
 import org.encog.neural.networks.training.propagation.back.Backpropagation;
 import org.encog.persist.EncogPersistedCollection;
-import org.encog.persist.PersistWriter;
 
 import java.io.File;
-import java.util.Iterator;
 
 
 /**
@@ -97,6 +94,10 @@ public class NeuralNetPlayer implements AIPlayer {
 
     public Move ComputeMove(Game game) {
 
+        if(game.GetMoveNumber() == 1) {
+            Q = 1;
+        }
+
         // Get the current position and extract the state
         Position currentPosition = game.getCurrentPosition();
         double[] state = getStateArray(currentPosition);
@@ -137,13 +138,13 @@ public class NeuralNetPlayer implements AIPlayer {
         d = new BasicNeuralData(newState);
         NeuralData output2 = neuralnet.compute(d);
 
-        player = game.GetWhoseTurn();
+        int oppo_player = game.GetWhoseTurn();
         double new_max_q = -999999;
 
         // Get the max Q value from the new state
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
-                Move move = new Move(i, j, player);
+                Move move = new Move(i, j, oppo_player);
                 if(currentPosition.MoveIsLegal(move)) {
                     int state_pos = (i - 1) * 8 + (j - 1);
                     if(output2.getData()[state_pos] > new_max_q) {
@@ -169,7 +170,8 @@ public class NeuralNetPlayer implements AIPlayer {
 
             if(game.MoveIsLegal(move)) {
                 game.MakeMove(move);
-                int oppo_score = game.getCurrentPosition().GetScore(player);
+                int oppo_score = game.getCurrentPosition().GetScore(oppo_player);
+//                reward = game.getCurrentPosition().GetScore(player) - game.getCurrentPosition().GetScore(oppo_player);
                 if(64 - oppo_score > 32) {
                     reward = 1;
                 } else if(oppo_score > 32){
@@ -177,7 +179,8 @@ public class NeuralNetPlayer implements AIPlayer {
                 }
             }
         } else if(game.GetMoveNumber() == 60) {
-            int nn_score = game.getCurrentPosition().GetScore(player);
+            int nn_score = game.getCurrentPosition().GetScore(oppo_player);
+//            reward = game.getCurrentPosition().GetScore(player) - game.getCurrentPosition().GetScore(oppo_player);
             if(nn_score > 32) {
                 reward = 1;
             } else if(64 - nn_score > 32){
