@@ -84,6 +84,10 @@ public class Position
         m_last_move = new Move(m);
     }
 
+    public int[][] getBoard() {
+        return m_board;
+    }
+
 
     /**
      * Returns the color of the piece at the square (x, y) (Score.WHITE,

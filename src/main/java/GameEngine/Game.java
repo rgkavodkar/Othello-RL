@@ -61,6 +61,10 @@ public class Game
         return true;
     }
 
+    public Position getCurrentPosition() {
+        return m_positions[m_movenumber];
+    }
+
 
     /**
      * Takes back a move. Returns true if not at the initial position.

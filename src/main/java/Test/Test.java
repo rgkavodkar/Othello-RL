@@ -1,6 +1,7 @@
 package Test;
 
 import org.encog.engine.network.activation.ActivationSigmoid;
+import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.neural.data.NeuralData;
 import org.encog.neural.data.NeuralDataPair;
 import org.encog.neural.data.NeuralDataSet;
@@ -24,13 +25,13 @@ public class Test {
     public static void main(String[] args) {
 
         BasicNetwork network = new BasicNetwork();
+        network.addLayer(new BasicLayer(new ActivationTANH(), true, 2));
         network.addLayer(new BasicLayer(new ActivationSigmoid(),true,2));
         network.addLayer(new BasicLayer(new ActivationSigmoid(),true,3));
         network.addLayer(new BasicLayer(new ActivationSigmoid(),true,1));
         network.setLogic(new FeedforwardLogic());
         network.getStructure().finalizeStructure();
         network.reset();
-
         NeuralDataSet trainingSet = new BasicNeuralDataSet(XOR_INPUT, XOR_IDEAL);
 
         // train the neural network

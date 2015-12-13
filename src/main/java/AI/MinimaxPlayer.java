@@ -342,26 +342,6 @@ public class MinimaxPlayer extends SuperEngine
             max_y = moves[i].m_y;
         }
 
-
-/********
- System.out.print("Number of pos. with highest score: ");
- System.out.println(number_of_maxval);
-
- System.out.print("Nodes searched:     ");
- System.out.println(m_nodes_searched);
-
- System.out.print("Total time:         ");
- System.out.println((endtime - starttime) / 1000.0);
-
- System.out.print("Time per node (ms): ");
- System.out.println((float) (endtime-starttime) / (float) m_nodes_searched);
-
- System.out.print("Position value:     ");
- if (maxval != -LARGEINT) System.out.println(maxval);
-
- System.out.println("");
- ********/
-
         if (GetInterrupt()) return null;
         else if (maxval != -LARGEINT) return new Move(max_x, max_y, player);
         else return null;

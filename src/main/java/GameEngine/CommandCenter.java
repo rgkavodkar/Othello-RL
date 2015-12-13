@@ -31,7 +31,7 @@ public class CommandCenter implements Runnable, Commands
             m_Engine  = new PositionalPlayer();
         } else if(mode == 3) {
             // NeuralNet player
-            m_Engine  = new NeuralNetPlayer();
+            m_Engine  = new NeuralNetPlayer(0.1);
         }
         m_Game = new Game();
     }
