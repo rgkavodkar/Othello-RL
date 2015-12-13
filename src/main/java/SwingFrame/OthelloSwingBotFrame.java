@@ -33,104 +33,63 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
     {
         m_createdByApplet = createdByApplet;
 
-        if (createdByApplet)
+        if(createdByApplet) {
             setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        else
-            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+//        else
+//            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 
-        // Set the kind of AI player
-        m_CommandInterface = new BotCommandCenter(mode);
+            // Set the kind of AI player
+            m_CommandInterface = new BotCommandCenter(mode);
 
-        try
-        {
-            getResources();
+            try {
+                getResources();
+            } catch (Exception e) {
+                // Default values are set
+
+                // Should maybe set locale according to default values (english):
+                // setLocale(new Locale("en"));
+                // If so, it should also be done for dialogs et.c.
+            }
+
+            initComponents();
+
+            int boardSize = getIntProperty("Othello.BoardSize", 425);
+
+            m_boardDrawingArea = new BoardDrawingArea(m_CommandInterface);
+            m_boardDrawingArea.setMinimumSize(new java.awt.Dimension(300, 300));
+            m_boardDrawingArea.
+                    setPreferredSize(new java.awt.Dimension(boardSize, boardSize));
+            getContentPane().add(m_boardDrawingArea, java.awt.BorderLayout.CENTER);
+
+
+            setTitle(m_sTitle);
+
+            InstructionsFrame.pack();
+
+            pack();
+
+            StartBotGame();
+        } else {
+            // Set the kind of AI player
+            m_CommandInterface = new BotCommandCenter(mode);
+            StartBotGame();
         }
-        catch(Exception e)
-        {
-            // Default values are set
-
-            // Should maybe set locale according to default values (english):
-            // setLocale(new Locale("en"));
-            // If so, it should also be done for dialogs et.c.
-        }
-
-        initComponents();
-
-        int boardSize = getIntProperty("Othello.BoardSize", 425);
-
-        m_boardDrawingArea = new BoardDrawingArea(m_CommandInterface);
-        m_boardDrawingArea.setMinimumSize(new java.awt.Dimension(300, 300));
-        m_boardDrawingArea.
-                setPreferredSize(new java.awt.Dimension(boardSize, boardSize));
-        getContentPane().add(m_boardDrawingArea, java.awt.BorderLayout.CENTER);
-
-
-        setTitle(m_sTitle);
-
-        InstructionsFrame.pack();
-
-        pack();
-
-        StartBotGame();
     }
 
     public void StartBotGame() {
 
-        System.out.println("Starting bot game");
         int pairMoveCounter = 0;
         while(pairMoveCounter < 60) {
             pairMoveCounter++;
             m_CommandInterface.makeBotMove();
-            UpdateAll();
-//            try {
-//                Thread.sleep(200);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            if(m_createdByApplet)
+                UpdateAll();
         }
-        System.out.println("Done with bot game");
+        m_CommandInterface.closingTasks();
 
     }
 
-
-    /**
-     ****************************************************************
-     * Called when a move computation is finished.
-     ****************************************************************/
-
-//    public void ComputationFinished(Move m)
-//    {
-//        if (m != null && m.GetPlayer() == m_CommandInterface.GetWhoseTurn())
-//        {
-//            EventQueue.invokeLater(this);
-//
-//            m_CommandInterface.ComputeMove(this);
-//        }
-//        else
-//        {
-//            m_computing = false;
-//
-//            EventQueue.invokeLater(this);
-//        }
-//    }
-
-
-    /**
-     ****************************************************************
-     * Calls UpdateAll(). Must be used when updates are made from the
-     * move caclulation thread.
-     ****************************************************************/
-
-//    public void run()
-//    {
-//        if (! m_computing)
-//            m_boardDrawingArea.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-//        TextPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-//        jPanelCalculating.setVisible(false);
-//
-//        UpdateAll();
-//    }
 
 
     /**
@@ -445,20 +404,6 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
 
         CommandsMenu.add(NewGame);
 
-//        InterruptComputation.setText("Item");
-//        InterruptComputation.setText(m_sInterruptComputation);
-//        InterruptComputation.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
-//        InterruptComputation.setMnemonic(m_cInterruptComputationMnemonic);
-//        if (m_sInterruptComputationToolTip.length() > 0) InterruptComputation.setToolTipText(m_sInterruptComputationToolTip);
-//
-//        InterruptComputation.addActionListener(new java.awt.event.ActionListener() {
-//            public void actionPerformed(java.awt.event.ActionEvent evt) {
-//                InterruptComputationActionPerformed(evt);
-//            }
-//        });
-//
-//        CommandsMenu.add(InterruptComputation);
-
         Quit.setText("Item");
         Quit.setText(m_sQuit);
         Quit.setAccelerator(KeyStroke.getKeyStroke('Q', Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -542,62 +487,6 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
         InstructionsFrame.setVisible(true);
     }//GEN-LAST:event_InstructionsActionPerformed
 
-
-    /**
-     ****************************************************************
-     * Called when a mouse button is pressed in the BoardDrawingArea.
-     * @author  Mats Luthman
-     ****************************************************************/
-
-//    private void mousePressedEvent(java.awt.event.MouseEvent evt)
-//    {
-//        int xSquare =
-//                m_boardDrawingArea.getSquareXFromPosition(evt.getX(), evt.getY());
-//
-//        int ySquare =
-//                m_boardDrawingArea.getSquareYFromPosition(evt.getY(), evt.getY());
-//
-//        if (xSquare > 0 && xSquare < 9 && ySquare > 0 && ySquare < 9)
-//        {
-//            if (m_CommandInterface.MakeMoveIsPossible(xSquare, ySquare))
-//            {
-//                int player = m_CommandInterface.GetWhoseTurn();
-//
-//                m_CommandInterface.MakeMove(xSquare, ySquare);
-//
-//                if (m_CommandInterface.MoveIsPossible() &&
-//                        m_CommandInterface.GetWhoseTurn() != player)
-//                {
-//                    m_boardDrawingArea.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-//                    TextPanel.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-//                    jPanelCalculating.setVisible(true);
-//
-//                    UpdateAll();
-//
-////        Not necessary when worker thread is running at low priority:
-////          m_boardDrawingArea.paintImmediately(m_boardDrawingArea.getBounds());
-////          TextPanel.paintImmediately(m_boardDrawingArea.getBounds());
-//
-//
-//                    m_computing = true;
-//
-//                    m_CommandInterface.ComputeMove(this);
-//                }
-//                else
-//                    UpdateAll();
-//            }
-//        }
-//    }
-
-    /**
-     ****************************************************************
-     * Called when the interrupt calculation menu item is selected.
-     * @author  Mats Luthman
-     ****************************************************************/
-//
-//    private void InterruptComputationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_InterruptComputationActionPerformed
-//        m_CommandInterface.InterruptComputation();
-//    }//GEN-LAST:event_InterruptComputationActionPerformed
 
     /**
      ****************************************************************
@@ -868,8 +757,12 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
         if (fontSize != 0)
             MetalLookAndFeel.setCurrentTheme(new LargeFontsTheme(fontSize));
 
+        for (int i = 0; i < 1000; i++) {
+            System.out.print("Iteration: " + i);
+            new OthelloSwingBotFrame(false, 1).setVisible(false);
+        }
 
-        new OthelloSwingFrame(false, 1).setVisible(true);
+//        new OthelloSwingBotFrame(true, 1).setVisible(true);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -967,6 +860,4 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
     String m_sInstructionsText = "";
     String m_sClose = "Close";
 
-    // AI player
-    int m_ai_player = 1;
 }

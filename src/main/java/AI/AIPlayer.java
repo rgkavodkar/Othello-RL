@@ -12,5 +12,6 @@ public interface AIPlayer {
     void SetInterrupt(boolean cond);
     void SetStrength(int str);
     int GetStrength();
+    public void closingTasks();
 
 }

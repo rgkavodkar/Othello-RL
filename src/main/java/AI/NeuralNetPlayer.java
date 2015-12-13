@@ -184,6 +184,7 @@ public class NeuralNetPlayer implements AIPlayer {
             }
         }
 
+
         Q = (1 - q_learning_rate)*Q + q_learning_rate * (reward + gamma * new_max_q);
 
         double[] expected = output.getData();
@@ -191,6 +192,9 @@ public class NeuralNetPlayer implements AIPlayer {
 
         // Do backpropagation
         updateWeights(state, expected);
+        if(game.GetMoveNumber() == 60 || game.GetMoveNumber() == 59) {
+            saveNetwork();
+        }
         game.TakeBackMove();
         reward = 0;
         return final_move;
@@ -206,5 +210,9 @@ public class NeuralNetPlayer implements AIPlayer {
 
     public int GetStrength() {
         return 0;
+    }
+
+    public void closingTasks() {
+        saveNetwork();
     }
 }

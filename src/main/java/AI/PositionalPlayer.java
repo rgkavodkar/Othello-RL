@@ -38,4 +38,8 @@ public class PositionalPlayer implements AIPlayer {
     public int GetStrength() {
         return 0;
     }
+
+    public void closingTasks() {
+
+    }
 }

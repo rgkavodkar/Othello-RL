@@ -43,7 +43,15 @@ public class Score
     }
 
 
-    public int GetScore(int player) { return m_score[player-1]; }
+    public int GetScore(int player) {
+        int score = 0;
+        try {
+            score =  m_score[player - 1];
+        } catch (Exception e) {
+            System.out.println(player);
+        }
+        return score;
+    }
 
 
     public void SetScore(int player, int score) { m_score[player-1] = score; }

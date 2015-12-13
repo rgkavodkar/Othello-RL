@@ -40,6 +40,12 @@ public class BotCommandCenter implements Runnable, Commands, BotCommands
         m_Game = new Game();
     }
 
+    public void closingTasks() {
+        m_Engine_1.closingTasks();
+        m_Engine_2.closingTasks();
+        System.out.println(" | Player 1:" + m_Game.GetScore(1) + " | Player 2: " + m_Game.GetScore(2));
+    }
+
     public void makeBotMove() {
 
         int player = m_Game.GetWhoseTurn();

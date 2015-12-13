@@ -214,7 +214,7 @@ public class MinimaxPlayer extends SuperEngine
     public MinimaxPlayer(int st) { super(st); SetupBcBoard(); SetupBits(); }
 
 
-    public MinimaxPlayer() { super(5); SetupBcBoard(); SetupBits(); }
+    public MinimaxPlayer() { super(3); SetupBcBoard(); SetupBits(); }
 
 
     /**
@@ -345,6 +345,10 @@ public class MinimaxPlayer extends SuperEngine
         if (GetInterrupt()) return null;
         else if (maxval != -LARGEINT) return new Move(max_x, max_y, player);
         else return null;
+    }
+
+    public void closingTasks() {
+
     }
 
 

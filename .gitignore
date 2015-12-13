@@ -2,3 +2,4 @@
 Othello-RL.iml
 target/*
 *.iml
+*.eg
