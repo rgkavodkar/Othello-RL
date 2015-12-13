@@ -38,6 +38,7 @@ public class NeuralNetPlayer implements AIPlayer {
     public NeuralNetPlayer(double alpha) {
 
         File f = new File(NEURALNET_FILE);
+//        if(false) {
         if(f.exists() && !f.isDirectory()) {
             loadNetwork();
         } else {
@@ -50,9 +51,9 @@ public class NeuralNetPlayer implements AIPlayer {
             neuralnet.reset();
         }
 
-        Q = 0;
+        Q = 1;
         q_learning_rate = alpha;
-        gamma = 0.9;
+        gamma = 0.5;
         reward = 0;
     }
 

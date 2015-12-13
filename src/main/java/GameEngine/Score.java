@@ -48,7 +48,7 @@ public class Score
         try {
             score =  m_score[player - 1];
         } catch (Exception e) {
-            System.out.println(player);
+//            System.out.println(player);
         }
         return score;
     }
