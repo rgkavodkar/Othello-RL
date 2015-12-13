@@ -27,14 +27,14 @@ public class BotCommandCenter implements Runnable, Commands, BotCommands
         if(mode == 1) {
             // Minimax player
             m_Engine_1  = new MinimaxPlayer();
-            m_Engine_2  = new NeuralNetPlayer(0.1);
+            m_Engine_2  = new NeuralNetPlayer(0.5);
         } else if(mode == 2) {
             // Positional player
             m_Engine_1  = new PositionalPlayer();
             m_Engine_2  = new MinimaxPlayer();
         } else if(mode == 3) {
             // NeuralNet player
-            m_Engine_1  = new NeuralNetPlayer(0.1);
+            m_Engine_1  = new NeuralNetPlayer(0.5);
             m_Engine_2  = new MinimaxPlayer();
         }
         m_Game = new Game();
