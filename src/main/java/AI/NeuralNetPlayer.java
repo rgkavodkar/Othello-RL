@@ -3,6 +3,7 @@ package AI;
 import GameEngine.Game;
 import GameEngine.Move;
 import GameEngine.Position;
+import GameEngine.Score;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.neural.data.NeuralData;
@@ -16,6 +17,7 @@ import org.encog.neural.networks.training.propagation.back.Backpropagation;
 import org.encog.persist.EncogPersistedCollection;
 
 import java.io.File;
+import java.util.HashMap;
 
 
 /**
@@ -23,46 +25,72 @@ import java.io.File;
  */
 public class NeuralNetPlayer implements AIPlayer {
 
-    final String NEURALNET_FILE = "neuralnet.eg";
-    final String NEURALNET_ID = "neuralnet";
+    private final String NEURALNET_FILE = "neuralnet.eg";
+    private final String NEURALNET_ID = "neuralnet";
+    private double Q;
+    private double q_learning_rate;
+    private double gamma;
+    private int reward;
 
-    BasicNetwork neuralnet;
-    double Q;
-    double q_learning_rate;
-    double gamma;
-    int reward;
+    private HashMap<Integer, BasicNetwork> networkMap;
 
     public NeuralNetPlayer(double alpha) {
+        networkMap = new HashMap<Integer, BasicNetwork>();
 
         File f = new File(NEURALNET_FILE);
-//        if(false) {
         if(f.exists() && !f.isDirectory()) {
             loadNetwork();
         } else {
-            neuralnet = new BasicNetwork();
-            neuralnet.addLayer(new BasicLayer(new ActivationSigmoid(), false, 64));     // Input layer
-            neuralnet.addLayer(new BasicLayer(new ActivationTANH(), true, 44));         // Hidden layer, need to change the bias and neoron count and experiment if possible
-            neuralnet.addLayer(new BasicLayer(new ActivationSigmoid(), false, 64));     // Output layer
-            neuralnet.setLogic(new FeedforwardLogic());
-            neuralnet.getStructure().finalizeStructure();
-            neuralnet.reset();
+            for (int i = 0; i < 64; i++) {
+
+                BasicNetwork neuralnet = new BasicNetwork();
+                neuralnet.addLayer(new BasicLayer(null, false, 64));     // Input layer
+                neuralnet.addLayer(new BasicLayer(new ActivationTANH(), true, 44));         // Hidden layer, need to change the bias and neoron count and experiment if possible
+                neuralnet.addLayer(new BasicLayer(new ActivationTANH(), false, 1));     // Output layer
+                neuralnet.setLogic(new FeedforwardLogic());
+                neuralnet.getStructure().finalizeStructure();
+                neuralnet.reset();
+
+                networkMap.put(i+1, neuralnet);
+            }
         }
 
-        Q = 1;
+        Q = 0;
         q_learning_rate = alpha;
-        gamma = 0.5;
+        gamma = 1;
         reward = 0;
     }
 
     private void saveNetwork() {
         final EncogPersistedCollection persistor = new EncogPersistedCollection(NEURALNET_FILE);
         persistor.create();
-        persistor.add(NEURALNET_ID, neuralnet);
+        for (int i = 0; i < 64; i++) {
+            System.out.println("Writing NN " + (i+1));
+            persistor.add(NEURALNET_ID + (i + 1), networkMap.get(i + 1));
+        }
+        System.out.println("Done Writing NN");
     }
 
     private void loadNetwork() {
         final EncogPersistedCollection persistor = new EncogPersistedCollection(NEURALNET_FILE);
-        neuralnet = (BasicNetwork)persistor.find(NEURALNET_ID);
+
+        for (int i = 0; i < 64; i++) {
+            networkMap.put((i + 1), (BasicNetwork)persistor.find(NEURALNET_ID + (i + 1)));
+        }
+    }
+
+    private void onGameCompletion(Game game, int player_id) {
+        int nn_score = game.GetScore(player_id);
+        int opp_score = game.GetScore(Score.GetOpponent(player_id));
+
+        if(nn_score > opp_score) {
+            reward = 1;
+        } else if(nn_score < opp_score) {
+            reward = -1;
+        } else {
+            reward = 0;
+        }
+
     }
 
     private double[] getStateArray(Position position) {
@@ -79,45 +107,50 @@ public class NeuralNetPlayer implements AIPlayer {
     }
 
     // Perform one iteration of backpropagation
-    private void updateWeights(double[] inputState, double[] expected) {
-        double[][] input = new double[1][64];
-        double[][] ideal = new double[1][64];
-        input[0] = inputState;
-        ideal[0] = expected;
+    private void updateWeights(double[] inputState, double expected, int nn_index) {
 
-        NeuralDataSet dataset = new BasicNeuralDataSet(input, ideal);
+        if(nn_index == -1) {
+            return;
+        }
 
-        Backpropagation bProp = new Backpropagation(neuralnet, dataset);
+        NeuralDataSet trainingSet = new BasicNeuralDataSet(
+                new double[][]{ inputState },
+                new double[][] { {expected} }
+        );
+
+        Backpropagation bProp = new Backpropagation(networkMap.get(nn_index), trainingSet);
         bProp.setLearningRate(0.1);
         bProp.iteration();
     }
 
     public Move ComputeMove(Game game) {
 
-        if(game.GetMoveNumber() == 1) {
-            Q = 1;
-        }
-
         // Get the current position and extract the state
         Position currentPosition = game.getCurrentPosition();
         double[] state = getStateArray(currentPosition);
 
-        // Construct the NeuralData object using the state array
-        NeuralData d = new BasicNeuralData(state);
-        NeuralData output = neuralnet.compute(d);
+        // Input state for the neuralnetwork
+        NeuralData inputState = new BasicNeuralData(state);
 
         int player = game.GetWhoseTurn();
-        int max_x = 1, max_y = 1;
+        int max_x = -1, max_y = -1;
         double max_q = -999999;
+
+        int best_nn_index = -1;
 
         // Get the max output from the current position using the neuralnet
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
                 Move move = new Move(i, j, player);
                 if(currentPosition.MoveIsLegal(move)) {
+
                     int state_pos = (i - 1) * 8 + (j - 1);
-                    if(output.getData()[state_pos] > max_q) {
-                        max_q = output.getData()[state_pos];
+                    best_nn_index = state_pos + 1;
+                    BasicNetwork localNetwork = networkMap.get(best_nn_index);
+                    NeuralData output = localNetwork.compute(inputState);
+
+                    if(output.getData()[0] > max_q) {
+                        max_q = output.getData()[0];
                         max_x = i;
                         max_y = j;
                     }
@@ -125,19 +158,25 @@ public class NeuralNetPlayer implements AIPlayer {
             }
         }
 
-        // Make the move predicted above
-        Move final_move = new Move(max_x, max_y, player);
-        game.MakeMove(final_move);
+        Q = max_q;
+
+        // MAke the best move from the above deduction
+        Move final_move = null;
+        if(max_x != -1 && max_y != -1) {
+            final_move = new Move(max_x, max_y, player);
+            game.MakeMove(final_move);
+        }
 
         // Go to the new state, where the opponent has to make the move
         Position newPosition = game.getCurrentPosition();
-        double[] newState = getStateArray(currentPosition);
+        double[] newState = getStateArray(newPosition);
 
         // Construct the NeuralData object using the state array
         // And the get the predicted output array
-        d = new BasicNeuralData(newState);
-        NeuralData output2 = neuralnet.compute(d);
+        // Input state for the neuralnetwork
+        NeuralData nextState = new BasicNeuralData(newState);
 
+        // Opponents move
         int oppo_player = game.GetWhoseTurn();
         double new_max_q = -999999;
 
@@ -145,42 +184,55 @@ public class NeuralNetPlayer implements AIPlayer {
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
                 Move move = new Move(i, j, oppo_player);
-                if(currentPosition.MoveIsLegal(move)) {
+                if(newPosition.MoveIsLegal(move)) {
+
                     int state_pos = (i - 1) * 8 + (j - 1);
-                    if(output2.getData()[state_pos] > new_max_q) {
-                        new_max_q = output2.getData()[state_pos];
+                    BasicNetwork localNetwork = networkMap.get(state_pos + 1);
+                    NeuralData output = localNetwork.compute(nextState);
+
+                    if(output.getData()[0] > new_max_q) {
+                        new_max_q = output.getData()[0];
                     }
                 }
             }
         }
 
-        // Branch to calculate the reward
+        boolean gameComplete = false;
+
         if(game.GetMoveNumber() == 59) {
-            Move move = null;
+            gameComplete = true;
+
             int[][] b = newPosition.getBoard();
+            int b_i = -1, b_j = -1;
+
             for (int i = 1; i < 9; i++) {
                 for (int j = 1; j < 9; j++) {
                     if(b[i][j] == 0) {
-                        move = new Move(i, j, game.GetWhoseTurn());
+                        b_i = i;
+                        b_j = j;
                         break;
                     }
                 }
-
             }
 
-            if(game.MoveIsLegal(move)) {
-                game.MakeMove(move);
-                int oppo_score = game.getCurrentPosition().GetScore(oppo_player);
-//                reward = game.getCurrentPosition().GetScore(player) - game.getCurrentPosition().GetScore(oppo_player);
-                if(64 - oppo_score > 32) {
-                    reward = 1;
-                } else if(oppo_score > 32){
-                    reward = -1;
-                }
+            // Make the last move, if possible
+            if(game.MoveIsLegal(new Move(b_i, b_j, game.GetWhoseTurn()))) {
+                game.MakeMove(new Move(b_i, b_j, game.GetWhoseTurn()));
+            } else if(game.MoveIsLegal(new Move(b_i, b_j, player))) {
+                game.MakeMove(new Move(b_i, b_j, player));
             }
-        } else if(game.GetMoveNumber() == 60) {
+
+            // Compute the NN score
             int nn_score = game.getCurrentPosition().GetScore(oppo_player);
-//            reward = game.getCurrentPosition().GetScore(player) - game.getCurrentPosition().GetScore(oppo_player);
+            if(nn_score > 32) {
+                reward = 1;
+            } else if(64 - nn_score > 32){
+                reward = -1;
+            }
+
+        } else if(game.GetMoveNumber() == 60) {
+            gameComplete = true;
+            int nn_score = game.getCurrentPosition().GetScore(oppo_player);
             if(nn_score > 32) {
                 reward = 1;
             } else if(64 - nn_score > 32){
@@ -188,21 +240,127 @@ public class NeuralNetPlayer implements AIPlayer {
             }
         }
 
-
         Q = (1 - q_learning_rate)*Q + q_learning_rate * (reward + gamma * new_max_q);
 
-        double[] expected = output.getData();
-        expected[(max_x - 1) * 8 + (max_y - 1)] = Q;
+        updateWeights(state, Q, best_nn_index);
 
-        // Do backpropagation
-        updateWeights(state, expected);
-        if(game.GetMoveNumber() == 60 || game.GetMoveNumber() == 59) {
-            saveNetwork();
-        }
-        game.TakeBackMove();
+
+        if((max_x != -1 && max_y != -1) && !gameComplete)
+            game.TakeBackMove();
+
         reward = 0;
+
         return final_move;
     }
+
+//    public Move ComputeMove2(Game game) {
+//
+//        if(game.GetMoveNumber() == 1) {
+//            Q = 0;
+//        }
+//
+//        // Get the current position and extract the state
+//        Position currentPosition = game.getCurrentPosition();
+//        double[] state = getStateArray(currentPosition);
+//
+//        // Construct the NeuralData object using the state array
+//        NeuralData d = new BasicNeuralData(state);
+//        NeuralData output = neuralnet.compute(d);
+//
+//        int player = game.GetWhoseTurn();
+//        int max_x = 1, max_y = 1;
+//        double max_q = -999999;
+//
+//        // Get the max output from the current position using the neuralnet
+//        for (int i = 1; i < 9; i++) {
+//            for (int j = 1; j < 9; j++) {
+//                Move move = new Move(i, j, player);
+//                if(currentPosition.MoveIsLegal(move)) {
+//                    int state_pos = (i - 1) * 8 + (j - 1);
+//                    if(output.getData()[state_pos] > max_q) {
+//                        max_q = output.getData()[state_pos];
+//                        max_x = i;
+//                        max_y = j;
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Make the move predicted above
+//        Move final_move = new Move(max_x, max_y, player);
+//        game.MakeMove(final_move);
+//
+//        // Go to the new state, where the opponent has to make the move
+//        Position newPosition = game.getCurrentPosition();
+//        double[] newState = getStateArray(currentPosition);
+//
+//        // Construct the NeuralData object using the state array
+//        // And the get the predicted output array
+//        d = new BasicNeuralData(newState);
+//        NeuralData output2 = neuralnet.compute(d);
+//
+//        int oppo_player = game.GetWhoseTurn();
+//        double new_max_q = -999999;
+//
+//        // Get the max Q value from the new state
+//        for (int i = 1; i < 9; i++) {
+//            for (int j = 1; j < 9; j++) {
+//                Move move = new Move(i, j, oppo_player);
+//                if(currentPosition.MoveIsLegal(move)) {
+//                    int state_pos = (i - 1) * 8 + (j - 1);
+//                    if(output2.getData()[state_pos] > new_max_q) {
+//                        new_max_q = output2.getData()[state_pos];
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Branch to calculate the reward
+//        if(game.GetMoveNumber() == 59) {
+//            Move move = null;
+//            int[][] b = newPosition.getBoard();
+//            for (int i = 1; i < 9; i++) {
+//                for (int j = 1; j < 9; j++) {
+//                    if(b[i][j] == 0) {
+//                        move = new Move(i, j, game.GetWhoseTurn());
+//                        break;
+//                    }
+//                }
+//            }
+//
+//            if(game.MoveIsLegal(move)) {
+//                game.MakeMove(move);
+//                int oppo_score = game.getCurrentPosition().GetScore(oppo_player);
+//                if(64 - oppo_score > 32) {
+//                    reward = 1;
+//                } else if(oppo_score > 32){
+//                    reward = -1;
+//                }
+//            }
+//        } else if(game.GetMoveNumber() == 60) {
+//            int nn_score = game.getCurrentPosition().GetScore(oppo_player);
+//            if(nn_score > 32) {
+//                reward = 1;
+//            } else if(64 - nn_score > 32){
+//                reward = -1;
+//            }
+//        }
+//
+//
+//        Q = (1 - q_learning_rate)*Q + q_learning_rate * (reward + gamma * new_max_q);
+//
+//        double[] expected = output.getData();
+//        expected[(max_x - 1) * 8 + (max_y - 1)] = Q;
+//
+//        // Do backpropagation
+//        updateWeights(state, expected);
+//        if(game.GetMoveNumber() == 60 || game.GetMoveNumber() == 59) {
+//            saveNetwork();
+//        }
+//        game.TakeBackMove();
+//        reward = 0;
+//        return final_move;
+//    }
 
     public void SetInterrupt(boolean cond) {
 
