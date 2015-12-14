@@ -13,6 +13,8 @@ import AI.PositionalPlayer;
 import GameEngine.Interfaces.BotCommands;
 import GameEngine.Interfaces.Commands;
 
+import java.text.DecimalFormat;
+
 /**
  * Implements an interface to Othello.MinimaxPlayer that is directed to
  * what a user interface might want to do.
@@ -20,6 +22,10 @@ import GameEngine.Interfaces.Commands;
 
 public class BotCommandCenter implements Runnable, Commands, BotCommands
 {
+    private int counter_30_plus;
+    private int counter_20_30;
+    private int counter_10_20;
+    private int counter_0_10;
     public BotCommandCenter(int mode)
     {
         m_last_entered_move_score = 0;
@@ -40,8 +46,20 @@ public class BotCommandCenter implements Runnable, Commands, BotCommands
         m_Game = new Game();
     }
 
-    public void printScores() {
-        System.out.println(" | Player 1:" + m_Game.GetScore(1) + " | Player 2: " + m_Game.GetScore(2));
+    public void printScores(int i) {
+        int score = m_Game.GetScore(2);
+        if(score <= 10) counter_0_10++;
+        else if(score > 10 && score < 20) counter_10_20++;
+        else if(score > 20 && score < 30) counter_20_30++;
+        else if(score > 30) counter_30_plus++;
+
+        String percent_0_10 = new DecimalFormat("#0.00").format((double) counter_0_10 / i * 100);
+        String percent_10_20 = new DecimalFormat("#0.00").format((double) counter_10_20 / i * 100);
+        String percent_20_30 = new DecimalFormat("#0.00").format((double) counter_20_30 / i * 100);
+        String percent_30_plus = new DecimalFormat("#0.00").format((double) counter_30_plus / i * 100);
+
+        if(score > 15)
+            System.out.println("Iteration: " + i + " | 0-10: " + percent_0_10 + " | 10-20: " + percent_10_20 + " | 20-30: " + percent_20_30 + " | 30+: " + percent_30_plus+ " | Player 1:" + m_Game.GetScore(1) + " | Player 2: " + score);
     }
 
     public void closingTasks() {

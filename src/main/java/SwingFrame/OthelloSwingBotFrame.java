@@ -80,8 +80,8 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
 
     public void StartMultipleBotGame() {
 
-        for (int i = 0; i < 30000; i++) {
-            System.out.print("Iteration: " + i);
+        for (int i = 0; i < 300000; i++) {
+//            System.out.print("Iteration: " + i);
             int moveCounter = 0;
             while(moveCounter < 60) {
                 moveCounter++;
@@ -89,7 +89,7 @@ public class OthelloSwingBotFrame extends javax.swing.JFrame
                 if(m_createdByApplet)
                     UpdateAll();
             }
-            m_CommandInterface.printScores();
+            m_CommandInterface.printScores(i);
             m_CommandInterface.NewGame();
         }
         m_CommandInterface.closingTasks();

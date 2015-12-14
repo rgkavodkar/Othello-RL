@@ -54,6 +54,17 @@ public class NeuralNetPlayer implements AIPlayer {
             {10,    -2,     1,      0.5,    0.5,    1,      -2,     10}
     };
 
+    private double[][] reward3Matrix = {
+            {100,   -20,   10,   5,    5,    10,   -20,  100},
+            {-20,   -50,   -2,   -2,   -2,   -2,   -50,  -20},
+            {10,    -2,    -1,   -1,   -1,   -1,   -2,   1},
+            {5,     -2,    -1,   -1,   -1,   -1,   -2,   5},
+            {5,     -2,    -1,   -1,   -1,   -1,   -2,   5},
+            {10,    -2,    -1,   -1,   -1,   -1,   -2,   1},
+            {-20,   -50,   -2,   -2,   -2,   -2,   -50,  -20},
+            {100,   -20,   10,   5,    5,    10,   -20,  100},
+    };
+
     private HashMap<Integer, BasicNetwork> networkMap;
 
     public NeuralNetPlayer(double alpha) {
@@ -67,7 +78,7 @@ public class NeuralNetPlayer implements AIPlayer {
 
                 BasicNetwork neuralnet = new BasicNetwork();
                 neuralnet.addLayer(new BasicLayer(null, false, 64));     // Input layer
-                neuralnet.addLayer(new BasicLayer(new ActivationTANH(), false, 36));         // Hidden layer, need to change the bias and neoron count and experiment if possible
+                neuralnet.addLayer(new BasicLayer(new ActivationTANH(), false, 32));         // Hidden layer, need to change the bias and neoron count and experiment if possible
                 neuralnet.addLayer(new BasicLayer(new ActivationTANH(), false, 1));     // Output layer
                 neuralnet.setLogic(new FeedforwardLogic());
                 neuralnet.getStructure().finalizeStructure();
@@ -78,7 +89,8 @@ public class NeuralNetPlayer implements AIPlayer {
         }
 
         Q = 0;
-        q_learning_rate = alpha;
+//        q_learning_rate = alpha;
+        q_learning_rate = 0.1;
         gamma = 1;
         reward = 0;
     }
@@ -173,7 +185,7 @@ public class NeuralNetPlayer implements AIPlayer {
         if(max_x != -1 && max_y != -1) {
             final_move = new Move(max_x, max_y, player);
             game.MakeMove(final_move);
-            reward = reward2Matrix[max_x - 1][max_y - 1];
+            reward = reward3Matrix[max_x - 1][max_y - 1];
         }
 
         // Go to the new state, where the opponent has to make the move
@@ -234,18 +246,18 @@ public class NeuralNetPlayer implements AIPlayer {
             // Compute the NN score
             int nn_score = game.getCurrentPosition().GetScore(oppo_player);
             if(nn_score > 32) {
-                reward = 10;
+                reward = 100;
             } else if(64 - nn_score > 32){
-                reward = -10;
+                reward = -100;
             }
 
         } else if(game.GetMoveNumber() == 60) {
             gameComplete = true;
             int nn_score = game.getCurrentPosition().GetScore(oppo_player);
             if(nn_score > 32) {
-                reward = 10;
+                reward = 100;
             } else if(64 - nn_score > 32){
-                reward = -10;
+                reward = -100;
             }
         }
 
