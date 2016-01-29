@@ -156,6 +156,7 @@ public class MinimaxPlayer extends SuperEngine
      */
 
     private int m_bc_board[][];
+    private double[][] reward3Matrix;
 
     /**
      * Holds the number of pieces of each color during the search
@@ -214,7 +215,7 @@ public class MinimaxPlayer extends SuperEngine
     public MinimaxPlayer(int st) { super(st); SetupBcBoard(); SetupBits(); }
 
 
-    public MinimaxPlayer() { super(3); SetupBcBoard(); SetupBits(); }
+    public MinimaxPlayer() { super(2); SetupBcBoard(); SetupBits(); }
 
 
     /**
@@ -550,7 +551,7 @@ public class MinimaxPlayer extends SuperEngine
             for (int j=1; j < 9; j++)
             {
                 if (i == 2 || i == 7) m_bc_board[i][j] = -2; else m_bc_board[i][j] = 0;
-                if (j == 2 || j == 7) m_bc_board[i][j] -= 2;
+                if (j == 2 || j == 7) m_bc_board[i][j] = -2;
             }
 
         m_bc_board[1][1] = 20;
@@ -566,6 +567,28 @@ public class MinimaxPlayer extends SuperEngine
         m_bc_board[2][8] = -2;
         m_bc_board[8][7] = -2;
         m_bc_board[7][8] = -2;
+
+//        for (int i=1; i < 9; i++)
+//            for (int j=1; j < 9; j++)
+//            {
+//                if (i == 2 || i == 7) m_bc_board[i][j] = 20; else m_bc_board[i][j] = 0;
+//                if (j == 2 || j == 7) m_bc_board[i][j] = 20;
+//            }
+//
+//        m_bc_board[1][1] = -20;
+//        m_bc_board[8][1] = -20;
+//        m_bc_board[1][8] = -20;
+//        m_bc_board[8][8] = -20;
+//
+//        m_bc_board[1][2] = 20;
+//        m_bc_board[2][1] = 20;
+//        m_bc_board[1][7] = 20;
+//        m_bc_board[7][1] = 20;
+//        m_bc_board[8][2] = 20;
+//        m_bc_board[2][8] = 20;
+//        m_bc_board[8][7] = 20;
+//        m_bc_board[7][8] = 20;
+
     }
 
 

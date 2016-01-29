@@ -871,7 +871,7 @@ public class OthelloSwingFrame extends javax.swing.JFrame
 //    javax.swing.UIManager.put("CheckBox.font", new Font("Dialog", Font.PLAIN, 24));
 //    javax.swing.UIManager.put("MenuItem.font", new Font("Dialog", Font.PLAIN, 24));
 
-        new OthelloSwingFrame(false, 1).setVisible(true);
+        new OthelloSwingFrame(true, 3).setVisible(true);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

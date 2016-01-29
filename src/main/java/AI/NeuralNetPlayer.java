@@ -18,6 +18,7 @@ import org.encog.persist.EncogPersistedCollection;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Random;
 
 
 /**
@@ -31,6 +32,12 @@ public class NeuralNetPlayer implements AIPlayer {
     private double q_learning_rate;
     private double gamma;
     private double reward;
+    boolean explore;
+    private double t, a = 1, b = 0.99999, c= 0.002;
+    int gamesPlayed;
+
+
+    int playerID;
 
     private double[][] rewardMatrix = {
             {1,     -0.2,   0.1,    0.05,   0.05,   0.1,    -0.2,   1},
@@ -67,8 +74,9 @@ public class NeuralNetPlayer implements AIPlayer {
 
     private HashMap<Integer, BasicNetwork> networkMap;
 
-    public NeuralNetPlayer(double alpha) {
-        networkMap = new HashMap<Integer, BasicNetwork>();
+    public NeuralNetPlayer(double alpha, int player) {
+
+        networkMap = new HashMap<>();
 
         File f = new File(NEURALNET_FILE);
         if(f.exists() && !f.isDirectory()) {
@@ -76,11 +84,17 @@ public class NeuralNetPlayer implements AIPlayer {
         } else {
             for (int i = 0; i < 64; i++) {
 
+                // Create a basic neuralnet object
                 BasicNetwork neuralnet = new BasicNetwork();
-                neuralnet.addLayer(new BasicLayer(null, false, 64));     // Input layer
-                neuralnet.addLayer(new BasicLayer(new ActivationTANH(), false, 32));         // Hidden layer, need to change the bias and neoron count and experiment if possible
-                neuralnet.addLayer(new BasicLayer(new ActivationTANH(), false, 1));     // Output layer
+                // Add the input layer with 64 neurons, no bias
+                neuralnet.addLayer(new BasicLayer(null, false, 64));
+                // Add the hidden layer with 32 neurons, TANH activated
+                neuralnet.addLayer(new BasicLayer(new ActivationTANH(), false, 32));
+                // Add the output layer with 1 neuron, TANH activated
+                neuralnet.addLayer(new BasicLayer(new ActivationTANH(), false, 1));
+                // Set it as a feedforward network
                 neuralnet.setLogic(new FeedforwardLogic());
+                // Finalize and reset the structure
                 neuralnet.getStructure().finalizeStructure();
                 neuralnet.reset();
 
@@ -88,14 +102,20 @@ public class NeuralNetPlayer implements AIPlayer {
             }
         }
 
+        playerID = player;
         Q = 0;
 //        q_learning_rate = alpha;
         q_learning_rate = 0.1;
         gamma = 1;
         reward = 0;
+
+        explore = true;
+
+        t = a*Math.pow(b, gamesPlayed);
     }
 
     private void saveNetwork() {
+        if(playerID == 1) return;
         final EncogPersistedCollection persistor = new EncogPersistedCollection(NEURALNET_FILE);
         persistor.create();
         for (int i = 0; i < 64; i++) {
@@ -109,6 +129,7 @@ public class NeuralNetPlayer implements AIPlayer {
         final EncogPersistedCollection persistor = new EncogPersistedCollection(NEURALNET_FILE);
 
         for (int i = 0; i < 64; i++) {
+            System.out.println("Loading NeuralNet " + i);
             networkMap.put((i + 1), (BasicNetwork)persistor.find(NEURALNET_ID + (i + 1)));
         }
     }
@@ -133,18 +154,24 @@ public class NeuralNetPlayer implements AIPlayer {
             return;
         }
 
+        // Create a NeuralDataSet object which contains the input and the expected output
         NeuralDataSet trainingSet = new BasicNeuralDataSet(
                 new double[][]{ inputState },
                 new double[][] { {expected} }
         );
 
+        // Create a BackPropagation object that adjusts the weights of the NN passed
         Backpropagation bProp = new Backpropagation(networkMap.get(nn_index), trainingSet);
+        // Set the neural network learning rate and the momentum
         bProp.setLearningRate(0.1);
         bProp.setMomentum(0);
+        // Perform the backpropagation
         bProp.iteration();
     }
 
     public Move ComputeMove(Game game) {
+
+//        System.out.println("t = " + t + " | c = " + c);
 
         // Get the current position and extract the state
         Position currentPosition = game.getCurrentPosition();
@@ -159,6 +186,8 @@ public class NeuralNetPlayer implements AIPlayer {
 
         int best_nn_index = -1;
 
+        double divisor = 0;
+
         // Get the max output from the current position using the neuralnet
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
@@ -170,14 +199,55 @@ public class NeuralNetPlayer implements AIPlayer {
                     BasicNetwork localNetwork = networkMap.get(best_nn_index);
                     NeuralData output = localNetwork.compute(inputState);
 
-                    if(output.getData(0) > max_q) {
-                        max_q = output.getData(0);
+                    double qValue = output.getData(0);
+
+                    if (qValue > max_q) {
+                        max_q = qValue;
                         max_x = i;
                         max_y = j;
                     }
+
+                    divisor += Math.exp(qValue / t);
                 }
             }
         }
+
+        if(explore) {
+            double choice = new Random().nextDouble();
+            double sum = 0;
+
+            for (int i = 1; i < 9; i++) {
+
+                boolean breaker = false;
+
+                for (int j = 1; j < 9; j++) {
+                    Move move = new Move(i, j, player);
+                    if(currentPosition.MoveIsLegal(move)) {
+                        int state_pos = (i - 1) * 8 + (j - 1);
+                        best_nn_index = state_pos + 1;
+                        BasicNetwork localNetwork = networkMap.get(best_nn_index);
+                        NeuralData output = localNetwork.compute(inputState);
+
+                        double qValue = output.getData(0);
+
+                        double p = Math.exp(qValue/t)/divisor;
+                        sum += p;
+
+                        if(choice <= sum) {
+                            max_q = qValue;
+                            max_x = i;
+                            max_y = j;
+
+                            breaker = true;
+                            break;
+                        }
+                    }
+                }
+                if(breaker) break;
+            }
+
+        }
+
         Q = max_q;
 
         // MAke the best move from the above deduction
@@ -223,12 +293,12 @@ public class NeuralNetPlayer implements AIPlayer {
         if(game.GetMoveNumber() == 59) {
             gameComplete = true;
 
-            int[][] b = newPosition.getBoard();
+            int[][] b1 = newPosition.getBoard();
             int b_i = -1, b_j = -1;
 
             for (int i = 1; i < 9; i++) {
                 for (int j = 1; j < 9; j++) {
-                    if(b[i][j] == 0) {
+                    if(b1[i][j] == 0) {
                         b_i = i;
                         b_j = j;
                         break;
@@ -246,19 +316,24 @@ public class NeuralNetPlayer implements AIPlayer {
             // Compute the NN score
             int nn_score = game.getCurrentPosition().GetScore(oppo_player);
             if(nn_score > 32) {
-                reward = 100;
+                reward = 10;
             } else if(64 - nn_score > 32){
-                reward = -100;
+                reward = -10;
             }
+
+            t = a*Math.pow(b, ++gamesPlayed);
+            explore = (t > c);
 
         } else if(game.GetMoveNumber() == 60) {
             gameComplete = true;
             int nn_score = game.getCurrentPosition().GetScore(oppo_player);
             if(nn_score > 32) {
-                reward = 100;
+                reward = 10;
             } else if(64 - nn_score > 32){
-                reward = -100;
+                reward = -10;
             }
+            t = a*Math.pow(b, ++gamesPlayed);
+            explore = (t > c);
         }
 
         Q = (1 - q_learning_rate)*Q + q_learning_rate * (reward + gamma * new_max_q);
